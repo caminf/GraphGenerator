@@ -1,7 +1,9 @@
 import { createCanvas } from 'canvas';
 import * as fs from 'fs';
 
-export const generate = (a: number, i: number, d: number, outputPath: string) => { 
+export class GraphGenerator{
+    public static generateGraph(a: number, i: number, d: number, outputPath: string){ 
+    
     const canvas = createCanvas(400, 400);
     const ctx = canvas.getContext('2d');
 
@@ -18,4 +20,5 @@ export const generate = (a: number, i: number, d: number, outputPath: string) =>
     // Guarda la imagen en la carpeta de salida
     const buffer = canvas.toBuffer('image/png');
     fs.writeFileSync(`${outputPath}/graph.png`, buffer);
+    }
 }
