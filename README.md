@@ -4,12 +4,12 @@ En una arquitectura de microkernel, el núcleo (o kernel) ofrece los servicios b
 
 Instrucciones de arranque:
 
-1. Clonar el repositorio
+1. Clonar el repositorio con git clone
 
-2. Instalar dependencias
+2. Instalar dependencias con npm i
 
-3. Compilar proyecto
+3. Compilar proyecto npm run dev
 
 4. Ejecutar la aplicación 
 
-npm run dev carpeta_codigo_fuente/ carpeta_donde_quedará_el_gráfico/ -a=true -i=true -d=true 
+npm run dev carpeta_codigo_fuente/ ./generatedGraphs -a=true -i=true -d=true
