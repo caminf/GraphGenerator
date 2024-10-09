@@ -1,7 +1,4 @@
-import { GraphGenerator } from '../services/GraphGenerator';
 import { Kernel } from './Kernel';
-// import { Logger } from '../utils/Logger';
-
 export class Application {
     private kernel: Kernel;
 
@@ -9,12 +6,11 @@ export class Application {
         const { sourcePath, outputPath, metricsOptions } = this.parseArguments(args);
         
         if (!sourcePath || !outputPath) {
-            // Logger.error('Faltan los parámetros necesarios. Uso: npm run dev <carpeta_codigo_fuente> <carpeta_donde_quedará_el_gráfico> -a=true -i=true -d=true');
+            console.error('Faltan los parámetros necesarios. Uso: npm run dev <carpeta_codigo_fuente> <carpeta_donde_quedará_el_gráfico> -a=true -i=true -d=true');
             process.exit(1);
         }
         
-        this.kernel = new Kernel(sourcePath, outputPath, metricsOptions);
-        // GraphGenerator.generateGraph();
+        this.kernel = new Kernel(sourcePath, outputPath, metricsOptions); 
     }
 
     private parseArguments(args: string[]): { sourcePath: string; outputPath: string; metricsOptions: { a: boolean; i: boolean; d: boolean } } {
@@ -34,11 +30,11 @@ export class Application {
 
     public async run(): Promise<void> {
         try {
-            // Logger.info('Inicializando la aplicación...');
+            console.info('Inicializando la aplicación...');
             await this.kernel.run();
-            // Logger.info('Ejecución finalizada exitosamente.');
+            console.info('Ejecución finalizada exitosamente.');
         } catch (error) {
-            // Logger.error(`Error en la aplicación: ${error.message}`);
+            console.error(`Error en la aplicación: ${(error as Error).message}`);
         }
     }
 }

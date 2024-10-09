@@ -1,16 +1,16 @@
 import * as fs from 'fs';
 import * as path from 'path';
-// import { Logger } from '../utils/Logger';
 
 export class Scanner {
 
     private static abstractCount: number = 0;
     private static concreteCount: number = 0;
-    private static efferentCalls: number = 0;
-    private static afferentCalls: number = 0;
+    private static classDependencies: Map<string, { efferent: number, afferent: number }> = new Map();
+    private static packageDependencies: Map<string, { efferent: number, afferent: number }> = new Map();
+
 
     public static async scan(directory: string): Promise<void> {
-        // Logger.info(`Escaneando la carpeta de código fuente: ${directory}`);
+        console.log(`Escaneando la carpeta de código fuente: ${directory}`);
         await this.processDirectory(directory);
     }
 
@@ -24,36 +24,40 @@ export class Scanner {
             if (stats.isDirectory()) {
                 await this.processDirectory(filePath);
             } else if (file.endsWith('.java')) {
-                this.processJavaFile(filePath);
+                const packageName = path.dirname(filePath);
+                this.processJavaFile(filePath, packageName);
             }
         }
     }
 
-    private static processJavaFile(filePath: string): void {
+    private static processJavaFile(filePath: string, packageName: string): void {
         const content = fs.readFileSync(filePath, 'utf-8');
+        const className = path.basename(filePath, '.java');
+
+        const efferentCalls = this.getEfferentCalls(content).length;
+        const afferentCalls = this.getAfferentCalls(content).length;
+
+        this.classDependencies.set(className, { efferent: efferentCalls, afferent: afferentCalls });
+
+        const packageMetrics = this.packageDependencies.get(packageName) || { efferent: 0, afferent: 0 };
+        packageMetrics.efferent += efferentCalls;
+        packageMetrics.afferent += afferentCalls;
+        this.packageDependencies.set(packageName, packageMetrics);
 
         if (content.includes('abstract class') || content.includes('interface')) {
             this.abstractCount++;
         } else {
             this.concreteCount++;
         }
-
-        const efferentCalls = this.getEfferentCalls(content);
-        const afferentCalls = this.getAfferentCalls(content);
-
-        this.efferentCalls += efferentCalls.length;
-        this.afferentCalls += afferentCalls.length;
     }
 
     private static getEfferentCalls(content: string): string[] {
-        //buscar
-        const efferentMatches = content.match("") || [];
+        const efferentMatches = content.match(/new\s+\w+|extends\s+\w+|implements\s+\w+/g) || [];
         return efferentMatches;
     }
 
     private static getAfferentCalls(content: string): string[] {
-        //buscar
-        const afferentMatches = content.match("") || [];
+        const afferentMatches = content.match(/\w+\s*\.\s*\w+\(/g) || [];
         return afferentMatches;
     }
 
@@ -64,12 +68,11 @@ export class Scanner {
     public static countConcreteClasses(): number {
         return this.concreteCount;
     }
-
-    public static countEfferentCalls(): number {
-        return this.efferentCalls;
+    public static getClassDependencies(): Map<string, { efferent: number, afferent: number }> {
+        return this.classDependencies;
     }
 
-    public static countAfferentCalls(): number {
-        return this.afferentCalls;
+    public static getPackageDependencies(): Map<string, { efferent: number, afferent: number }> {
+        return this.packageDependencies;
     }
 }
